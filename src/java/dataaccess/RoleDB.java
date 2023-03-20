@@ -1,10 +1,8 @@
 package dataaccess;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
+import javax.persistence.EntityManager;
 import models.Role;
 
 
@@ -13,70 +11,25 @@ import models.Role;
  * @author Jaz Baliola
  */
 public class RoleDB {
-    
-    //Get all roles
-
-    public List<Role> getAll() throws Exception {
-        List<Role> roles = new ArrayList<>();
-        ConnectionPool cp = ConnectionPool.getInstance();
-        Connection con = cp.getConnection();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+    public List<Role> getAll() throws Exception{
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
         
-        String sql = "SELECT * FROM userdb.role";
-        
-        try {
-            ps = con.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                
-                int roleId = rs.getInt(1);
-                String roleName = rs.getString(2);
-                
-                Role role = new Role(roleId, roleName);
-                roles.add(role);
-            }
-        } finally {
-            DBUtil.closeResultSet(rs);
-            DBUtil.closePreparedStatement(ps);
-            cp.freeConnection(con);
+        try{
+           List<Role> roles = em.createNamedQuery("Role.findAll", Role.class).getResultList();
+           return roles;
+        }finally{
+            em.close();
         }
-
-        return roles;
     }
     
-    //Get role by roldID
-
-    public Role get(int roleId) throws Exception {
-        Role role = null;
+    public Role get(int id) throws Exception{
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
         
-        ConnectionPool cp = ConnectionPool.getInstance();
-        Connection con = cp.getConnection();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        
-        String sql = "SELECT * FROM userdb.role WHERE role_id=?";
-        
-        try {
-            ps = con.prepareStatement(sql);
-            
-            ps.setInt(1, roleId);
-            rs = ps.executeQuery();
-            
-            if (rs.next()) {
-                
-                int userId = rs.getInt(1);
-                String userRole = rs.getString(2);
-                
-                
-                role = new Role(userId, userRole);
-            }
-        } finally {
-            DBUtil.closeResultSet(rs);
-            DBUtil.closePreparedStatement(ps);
-            cp.freeConnection(con);
+        try{
+            Role role = em.find(Role.class, id);
+            return role;
+        }finally{
+            em.close();
         }
-        
-        return role;
     }
 }

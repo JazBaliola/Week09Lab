@@ -1,22 +1,27 @@
 <%-- 
     Document   : users
-    Created on : Mar 12, 2023, 3:19:52 PM
     Author     : Jaz Baliola
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Manage Users</title>
-        <link href="${pageContext.request.contextPath}/css/style.css" type="text/css" rel="stylesheet">
+        <title>Managing User Application</title>
     </head>
     <body>
         <h1>Manage Users</h1>
-        
-        <c:if test="${users.size() gt 0}">
-            <table id="table">
+        <p>        
+            <c:if test="${message eq 'update'}">User information updated</c:if>
+            <c:if test="${message eq 'empty'}">No users found. Please add a user</c:if>
+            <c:if test="${message eq 'error'}">Sorry, something went wrong.</c:if>
+            </p>
+
+        <c:if test="${message ne 'empty'}">
+            <table border="1" cellpadding="5">
                 <tr>
                     <th>Email</th>
                     <th>First Name</th>
@@ -27,62 +32,68 @@
                 </tr>
                 <c:forEach items="${users}" var="user">
                     <tr>
-                        <td>${user.email}</td>
-                        <td>${user.firstName}</td>
-                        <td>${user.lastName}</td>
-                        <td>${user.role.roleName}</td>
-                        <td><a href="user?action=edit&amp;userEmail=${user.email.replace("+", "%2B")}">Edit</a></td>
-                        <td><a href="user?action=delete&amp;userEmail=${user.email.replace("+", "%2B")}">Delete</a></td>
+                        <td><c:out value="${user.email}"  /></td>
+                        <td><c:out value="${user.firstName}"  /></td>
+                        <td><c:out value="${user.lastName}"  /></td>
+                        <td><c:out value="${user.role.roleName}"  /></td>
+                        <td><input type="hidden" name="action" value="edit">
+                            <a href="<c:url value='/users?action=edit&amp;'>
+                                   <c:param name='email' value='${user.email}'/>  
+                               </c:url>">Edit
+                            </a></td> 
+                        <td><input type="hidden" name="action" value="delete">
+                            <a href="<c:url value='/users?action=delete&amp;'> 
+                                   <c:param name='email' value='${user.email}'/> 
+                               </c:url>"> Delete</a></td>     
                     </tr>
                 </c:forEach>
             </table>
         </c:if>
-        
-        <c:if test="${users.size() eq 0}">
-            <p>No users found. Please add a user.</p>
-        </c:if>
-        
-        <c:if test="${edit eq false}">
-            <h2>Add User</h2>
-            <form action="user" method="post">
-                Email: <input type="email" name="email" ><br />
-                First Name: <input type="text" name="fname" ><br />
-                Last Name: <input type="text" name="lname" ><br />
-                Password: <input type="password" name="password" ><br />
-                Role: <select name="role">
-                    <c:forEach items="${roles}" var="role">
-                        <option value="${role.id}">${role.roleName}</option>
-                    </c:forEach>
-                </select><br />
 
+        <c:if test="${selectedUser eq null}">
+            <form action="users" method="post">
+                <h2>Add User</h2>   
+                Email: <input type="text" value="${email}" name="email">  <br>
+                First name: <input type="text" value="${first}" name="first"> <br>
+                Last name: <input type="text" value="${last}" name="last"> <br>
+                Password: <input type="password" value="${pw}" name="pw"> <br>
+                Role: <select name="role">
+                    <option value="1">system admin</option>
+                    <option value="2">regular user</option>
+                </select>
+                <br>
+                <input type="submit" value="Add user">
                 <input type="hidden" name="action" value="add">
-                <input type="submit" value="Add User">
             </form>
-            <p>${error}</p>
         </c:if>
-            
-        <c:if test="${edit eq true}">
-            <h2>Edit User</h2>
-            <form action="user" method="post">
-                Email: ${editUser.email}<br />
-                <input type="hidden" name="email" value="${editUser.email}">
-                First Name: <input type="text" name="fname"  value="${editUser.firstName}"><br />
-                Last Name: <input type="text" name="lname"  value="${editUser.lastName}"><br />
-                Password: <input type="password" name="password" ><br />
-                Role: <select name="role">
-                    <!--<option value="${editUser.role.id}">${editUser.role.roleName}</option>-->
-                    <c:forEach items="${roles}" var="role">
-                        <option value="${role.id}" ${role.id eq editUser.role.id ? 'selected' : ''} >${role.roleName}</option>
-                    </c:forEach>
-                </select><br />
 
+        <c:if test="${(message eq 'edit')}">
+            <h2>Edit User</h2>
+            <form action="users" method="post">
+                Email: <c:out value="${email}"/> <input type="hidden" name="email" value="${email}">    <br>          
+                First name: <input type="text" value="${selectedUser.firstName}" name="first"> <br>
+                Last name: <input type="text" value="${selectedUser.lastName}" name="last"> <br>
+                Password: <input type="password" value="" name="pw"> <br>    
+                Role: <select name="role">                  
+                    <c:choose>
+                        <c:when test="${user_role_id == 1}" >                                  
+                            <option>system admin</option> 
+                            <option>regular user</option>
+                        </c:when>
+                        <c:otherwise>
+                            <option>regular user</option> 
+                            <option>system admin</option>
+                        </c:otherwise>
+                    </c:choose>                            
+                </select>
+                <br>
+                <input type="submit" value="Update">
                 <input type="hidden" name="action" value="update">
-                <input type="hidden" name="userEmail" value="${editUser.email}">
-                <input type="submit" value="Update User">
-                <button><a href="user" id="button">Cancel</a></button>
-            </form>
-            <p>${error}</p>
-        </c:if>
-        
+                <a href="/"><input type="button" value="Cancel">
+                    <input type="hidden" name="action" value="cancel"></a> 
+                </c:if>
+            <p>
+                ${mes}
+            </p> 
     </body>
 </html>

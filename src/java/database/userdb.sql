@@ -1,6 +1,6 @@
 /**
  * Author:  Jaz Baliola
- * Created: Mar 12, 2023
+ * Created: Mar 10, 2023
  */
 DROP SCHEMA IF EXISTS `userdb`;
 CREATE SCHEMA IF NOT EXISTS `userdb` DEFAULT CHARACTER SET latin1;

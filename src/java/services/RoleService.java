@@ -1,34 +1,25 @@
 package services;
 
-import models.Role;
 import dataaccess.RoleDB;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import models.Role;
 
 /**
  *
  * @author Jaz Baliola
  */
 public class RoleService {
-    private final RoleDB accessRoles = new RoleDB();
-    
-    //Get all roles
- 
-    public List<Role> getAll() throws Exception {
-        List<Role> roles;
-        
-        roles = accessRoles.getAll();
-        
-        return roles;
-    }
-    
-    //Get specific role by roleID
-  
-    public Role get(int roleID) throws Exception {
-        Role role;
-        
-        role = accessRoles.get(roleID);
-        
+
+    public Role get(int id) throws Exception {
+        RoleDB roleDB = new RoleDB();
+        Role role = roleDB.get(id);
         return role;
     }
+
+    public List<Role> getAll() throws Exception {
+        RoleDB roleDB = new RoleDB();
+        List<Role> roles = roleDB.getAll();
+        return roles;
+    }
+
 }
